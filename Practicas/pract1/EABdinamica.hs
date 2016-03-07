@@ -21,8 +21,14 @@ import EABestatica
 -- subst e x r  debe devolver e[x:=r].
 sust :: Asa -> Ident -> Asa -> Asa
 sust e x r = case e of
-              (VNum _) -> e
-              otherwise -> r
+        (VNum _) -> e
+        (VBol _) -> e
+        (Var y) -> 
+          if(x == y)
+            then r
+            else e
+        (Suma li ld) -> Suma (sust li x r) (sust ld x r)
+        (Prod li ld) -> Prod (sust li x r) (sust ld x r)
 
 
 --   Valores 

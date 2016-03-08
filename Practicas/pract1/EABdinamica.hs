@@ -29,6 +29,11 @@ sust e x r = case e of
             else e
         (Suma li ld) -> Suma (sust li x r) (sust ld x r)
         (Prod li ld) -> Prod (sust li x r) (sust ld x r)
+        (Suc elem) -> Suc (sust elem x r)
+        (Pred elem) -> Pred (sust elem x r)
+        (Iszero elem) -> Iszero (sust elem x r)
+        (Ifte co th el) -> Ifte (sust co x r) (sust th x r) (sust el x r)
+        (Let e1 e2 e3) -> Let e1 (sust e2 x r) (sust e3 x r)
 
 
 --   Valores 

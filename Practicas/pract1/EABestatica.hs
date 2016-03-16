@@ -22,9 +22,45 @@ type Ctx = [(Ident,Tipo)]
 
 --Implementacion de la semantica estatica (Juicios para tipos)
 vt :: Ctx -> Asa -> Tipo 
-vt _ (VNum x) = TNat
-vt _ (VBol x) = TBol
-vt [] (Var x) = error ("La variable "++(show x)++" no esta declarada en el contexto")
-vt ((var, tipo):xs) (Var x) 
-	| var == x = tipo
-	| otherwise = vt xs (Var x)
+vt [] (Var x) = error ("La variable "++ (show x) ++ " no esta declarada en el contexto")
+
+vt ((x,tx):rg) (Var y) = if x==y then tx else vt rg (Var y)
+
+vt _ (VNum _) = TNat
+vt _ (VBol _) = TBol
+vt t (Suma a b) 
+	| vt t a == TNat = if ((vt t b) == TNat)
+						then TNat
+						else error "Solo se pueden sumar numeros"
+	| vt t a == TBol = error "Solo se pueden sumar numeros"
+
+vt t (Prod a b) 
+	| vt t a == TNat = if ((vt t b) == TNat)
+						then TNat
+						else error "Solo se pueden multiplicar numeros"
+	| vt t a == TBol = error "Solo se pueden multiplicar numeros"
+
+vt t (Let (Var x) val exp) = 
+	let 
+		tVar = vt ((x, vt t val):t) (Var x)
+		tExp = vt ((x, vt t val):t) exp
+	in
+		if (tVar == tExp)
+			then tExp
+			else error "Los tipos no coinciden"
+
+vt t (Pred elem)
+	| vt t elem == TNat = TNat
+	| otherwise = error "La funcion Pred es solo para numeros"
+
+vt t (Suc elem)
+	| vt t elem == TNat = TNat
+	| otherwise = error "La funcion Suc es solo para numeros"
+
+vt t (Iszero elem)
+	| vt t elem == TNat = TBol
+	| otherwise = error "La funcion Iszero es solo para numeros"
+
+vt t (Ifte ev th el)
+	| vt t ev == TBol = vt t th
+	| otherwise = error "La funcion Ifte tiene que evaluar algo de tipo TBol"

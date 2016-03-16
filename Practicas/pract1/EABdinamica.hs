@@ -48,18 +48,54 @@ esvalor x = case x of
 -- Evaluación de expresiones
 -- Evalúa las expresiones que están bien tipadas.
 eval :: Asa -> Asa
-eval = error "Te toca"
+eval t 
+  | (vt [] t) == TNat = evalaux t
+  | (vt [] t) == TBol = evalaux t
+  | otherwise = error ((show (vt [] t)) ++ " Expresion mal tipada") 
+--eval = error "Te toca"
 
+-- Funcion que nos dice si una expresion se ha bloqueado y es una forma normal.
+esbloq :: Asa -> Bool
+esbloq (Var _) = True
+esbloq _ = False
+--esbloq (VNum _) = False
+--esbloq (VBol _) = False
+--esbloq (Suma a b) = False
+--esbloq (Prod a b) = False
 
 -- evalaux hace transiciones mientras no se llegue a un estado final.
 evalaux :: Asa -> Asa
-evalaux = error "Te toca"
+evalaux t 
+  | esvalor t = t -- es un valor y no se debe evaluar
+  | esbloq t = error ((show t) ++ " Expresion bloqueada") -- es una expresion bloqueada y no se puede seguir evaluando
+  | otherwise = eval (eval1p t)
+--evalaux = error "Te toca"
 
 
 -- Reglas de transición
 -- eval1p hace una transición mientras se pueda aplicar una regla de transición.
 eval1p :: Asa -> Asa
-eval1p = error "Te toca"
+eval1p (VNum x) = (VNum x)
+eval1p (VBol x) = (VBol x)
+eval1p (Suc (VNum x)) = VNum (x+1)
+eval1p (Pred (VNum x)) 
+          | x==0 = VNum 0
+          | otherwise = VNum (x-1)
+eval1p (Iszero (VNum x)) 
+          | x==0 = VBol True
+          | otherwise = VBol False
+eval1p (Suma (VNum x) (VNum y)) = VNum (x+y)
+eval1p (Prod (VNum x) (VNum y)) = VNum (x*y)
+eval1p (Suma a b) = eval1p (Suma (eval1p a) (eval1p b))
+eval1p (Prod a b) = eval1p (Prod (eval1p a) (eval1p b))
+eval1p (Iszero a) = eval1p (Iszero (eval1p a))
+eval1p (Suc a) = eval1p (Suc (eval1p a))
+eval1p (Pred a) = eval1p (Pred (eval1p a))
+eval1p (Ifte a b c) 
+          | eval1p a==VBol True = eval1p b
+          | eval1p a==VBol False = eval1p c
+eval1p (Let (Var x) val exp) = (sust exp x val)
+--eval1p = error "Te toca"
 
 
 -- 5 Pretty printer

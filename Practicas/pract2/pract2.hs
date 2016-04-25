@@ -55,8 +55,19 @@ algoritmoW e = let (Deriv (ctx,e',t),_) = w e [] in Deriv (ctx,e',t)
 
 
 --Realiza el algoritmo W en una expresión LamAB utilizando una lista de nombres que ya están ocupados. 
-w :: LamAB->[VarTipo]->(Juicio,[VarTipo])                
-w e vars = error "Te toca."
+--w e vars = error "Te toca."
+w :: LamAB->[VarTipo]->(Juicio,[VarTipo])
+w e vars = case e of 
+            (Var x) -> let  var = newVT vars
+                            vars1 = vars++[var] 
+                            ctx = [(x, var)]
+                            in ((Deriv (ctx, (VarT x), var)), vars)
+            --(VNum x) -> 
+           -- (VNum x) -> ((Deriv ([], (VNumT x), TNat)), vars)
+            --(VBool x) -> ((Deriv ([], (VBoolT x), TBool)), vars)
+            --(Var x) -> 
+            --(X x) -> 
+            otherwise -> error "d"
 
 {-PRUEBAS:-}
 
